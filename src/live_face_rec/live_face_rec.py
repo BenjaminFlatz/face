@@ -5,10 +5,11 @@ import numpy as np
 import os
 import numpy as np
 from mss import mss
+import screeninfo
 
 
-class FaceRec:
-    def __init__(self, rec, scaleFactor, directory, width, height):
+class LiveFaceRec:
+    def __init__(self, record, directory, monitor):
         self.known_face_encodings = []
         self.known_face_names = []
 
@@ -18,28 +19,36 @@ class FaceRec:
         self.face_encodings = []
 
         self.process = True
+        
+        self.record = record
 
-        self.rec = rec
-        self.scaleFactor = scaleFactor
-        self.width = width
-        self.height = height
+        self.width, self.height = self.get_window_size(monitor)
+        self.learn_faces(directory)
 
-        self.get_2_know(directory)
 
-    def get_2_know(self, directory):
+    def get_window_size(self, monitorIndex):
 
-        dictionary = {}
+        monitors = screeninfo.get_monitors()
+        monitor = monitors[monitorIndex]
+        if len(monitors) > 1:
+            monitorDownscale = 1
+        
+        else:
+            monitorDownscale = 2
+        
+        width = int(monitor.width/monitorDownscale)
+        height = int(monitor.height/monitorDownscale)
 
-        print(directory)
+        return width, height
+
+    def learn_faces(self, directory):
+
+        print('Learning faces from ' + directory)
 
         for item in os.listdir(directory):
-
-            print(item)
-            self.known_face_encodings.append(face_recognition.face_encodings(
-                face_recognition.load_image_file(directory + os.path.sep + item))[0])
+            self.known_face_encodings.append(face_recognition.face_encodings(face_recognition.load_image_file(directory + os.path.sep + item))[0])
             self.known_face_names.append(item.split(".")[0])
 
-        return dictionary
 
     def process_frame(self, frame):
 
@@ -54,13 +63,7 @@ class FaceRec:
                 matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding)
                 name = "Unknown"
 
-                # # If a match was found in self.known_face_encodings, just use the first one.
-                #
-                # if True in matches:
-                #     first_match_index = matches.index(True)
-                #     name = self.known_face_names[first_match_index]
-
-                # Or instead, use the known face with the smallest distance to the new face
+             
                 face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
                 best_match_index = np.argmin(face_distances)
                 if matches[best_match_index]:
@@ -73,32 +76,27 @@ class FaceRec:
 
     def get_frame(self, frame):
         
-        last_time = time.time()
-        
-
-        small_frame = cv2.resize(frame, (0, 0), fx=self.scaleFactor, fy=self.scaleFactor)
+        small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
         small_frame = small_frame[:, :, ::-1]
         
         self.process_frame(small_frame)
 
 
         for (top, right, bottom, left), name in zip(self.face_locations, self.face_names):
-            top *= int(1/self.scaleFactor)
-            right *= int(1/self.scaleFactor)
-            bottom *= int(1/self.scaleFactor)
-            left *= int(1/self.scaleFactor)
+            top *= 4
+            right *= 4
+            bottom *= 4
+            left *= 4
             cv2.rectangle(frame, (left, top),(right, bottom), (0, 0, 255), 2)
             cv2.rectangle(frame, (left, bottom - 35),(right, bottom), (0, 0, 255), cv2.FILLED)
             font = cv2.FONT_HERSHEY_DUPLEX
             cv2.putText(frame, name, (left + 6, bottom - 6),font, 1.0, (255, 255, 255), 1)
         
-        print('fps: {0}'.format(1 / (time.time()-last_time)))
         
         return frame     
 
-    def rec_cam(self):
+    def rec_camera(self):
         video_capture = cv2.VideoCapture(0)
-        process = True
 
         while True:
             ret, frame = video_capture.read()
@@ -110,7 +108,6 @@ class FaceRec:
         cv2.destroyAllWindows()
             
     def rec_screen(self):
-
         mon = {'top': 0, 'left': 0, 'width': self.width, 'height': self.height}
    
         with mss() as sct:
@@ -126,9 +123,9 @@ class FaceRec:
 
     def run(self):
         
-        if self.rec == 'cam':
-            self.rec_cam()
-        elif self.rec == 'screen':
+        if self.record == 'camera':
+            self.rec_camera()
+        elif self.record == 'screen':
             self.rec_screen()
         else:
             print('Choose a correct mode!')
