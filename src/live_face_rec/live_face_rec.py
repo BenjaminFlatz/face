@@ -9,7 +9,7 @@ import screeninfo
 
 
 class LiveFaceRec:
-    def __init__(self, record, directory, monitor):
+    def __init__(self, record, directory, width, height, downscaleFactor):
         self.known_face_encodings = []
         self.known_face_names = []
 
@@ -19,27 +19,15 @@ class LiveFaceRec:
         self.face_encodings = []
 
         self.process = True
-        
+        self.downscaleFactor = downscaleFactor
         self.record = record
 
-        self.width, self.height = self.get_window_size(monitor)
+        self.width = width
+        self.height = height
         self.learn_faces(directory)
 
 
-    def get_window_size(self, monitorIndex):
-
-        monitors = screeninfo.get_monitors()
-        monitor = monitors[monitorIndex]
-        if len(monitors) > 1:
-            monitorDownscale = 1
-        
-        else:
-            monitorDownscale = 2
-        
-        width = int(monitor.width/monitorDownscale)
-        height = int(monitor.height/monitorDownscale)
-
-        return width, height
+   
 
     def learn_faces(self, directory):
 
@@ -76,17 +64,17 @@ class LiveFaceRec:
 
     def get_frame(self, frame):
         
-        small_frame = cv2.resize(frame, (0, 0), fx=0.25, fy=0.25)
+        small_frame = cv2.resize(frame, (0, 0), fx=1/self.downscaleFactor, fy=1/self.downscaleFactor)
         small_frame = small_frame[:, :, ::-1]
         
         self.process_frame(small_frame)
 
 
         for (top, right, bottom, left), name in zip(self.face_locations, self.face_names):
-            top *= 4
-            right *= 4
-            bottom *= 4
-            left *= 4
+            top *= self.downscaleFactor
+            right *= self.downscaleFactor
+            bottom *= self.downscaleFactor
+            left *= self.downscaleFactor
             cv2.rectangle(frame, (left, top),(right, bottom), (0, 0, 255), 2)
             cv2.rectangle(frame, (left, bottom - 35),(right, bottom), (0, 0, 255), cv2.FILLED)
             font = cv2.FONT_HERSHEY_DUPLEX
