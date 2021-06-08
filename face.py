@@ -4,15 +4,15 @@ from src.live_face_rec import LiveFaceRec
 
 
 def get_window_size(monitorIndex):
-
+    
     monitors = screeninfo.get_monitors()
     monitor = monitors[monitorIndex]
+
     if len(monitors) > 1:
         downscale = 1
-
     else:
         downscale = 2
-    
+
     width = int(monitor.width/downscale)
     height = int(monitor.height/1)
 
@@ -27,10 +27,9 @@ if __name__ == '__main__':
     parser.add_argument("-f", "--factor", help="down scale factor for image processing", default=4, type=int)
     parser.add_argument("-m", "--monitor", help="monitor index", default=0, type=int)
     args = parser.parse_args()
+
     width = int(args.size.split(',')[0])
     height = int(args.size.split(',')[1])
-
-
     #width, height = get_window_size(args.monitor)
 
     fr = LiveFaceRec(args.record, args.directory, width, height, args.factor)

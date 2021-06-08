@@ -1,11 +1,10 @@
-import time
 import face_recognition
 import cv2  # opencv-python
 import numpy as np
 import os
 import numpy as np
 from mss import mss
-import screeninfo
+
 
 
 class LiveFaceRec:
