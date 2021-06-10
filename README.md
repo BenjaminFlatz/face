@@ -1,7 +1,17 @@
 # Face
 
+### description
 
-### optional arguments:
+Project to recognize known faces on camera or screen.
+
+### goals
+
+- [x] use/learn face_recognition
+- [x] name known faces to image filenames
+- [x] let user choose between screen or camera
+
+
+### optional arguments
 ```
   -h     --help      show this help message and exit
   -r     --record    record screen or camera (default: camera)
