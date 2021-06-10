@@ -61,7 +61,7 @@ class LiveFaceRec:
         self.process = not self.process
 
 
-    def get_frame(self, frame):
+    def rec_frame(self, frame):
         
         small_frame = cv2.resize(frame, (0, 0), fx=1/self.downscaleFactor, fy=1/self.downscaleFactor)
         small_frame = small_frame[:, :, ::-1]
@@ -87,7 +87,7 @@ class LiveFaceRec:
 
         while True:
             ret, frame = video_capture.read()
-            cv2.imshow('Screen', self.get_frame(frame))
+            cv2.imshow('Screen', self.rec_frame(frame))
             if cv2.waitKey(1) == ord("q"):
                 break
 
@@ -101,7 +101,7 @@ class LiveFaceRec:
             while True:
 
                 frame = cv2.cvtColor(np.array(sct.grab(mon)), cv2.COLOR_BGRA2BGR)
-                cv2.imshow('Screen', self.get_frame(frame))
+                cv2.imshow('Screen', self.rec_frame(frame))
 
                 if cv2.waitKey(1) == ord("q"):
                     break
