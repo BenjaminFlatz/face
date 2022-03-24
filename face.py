@@ -4,7 +4,6 @@ from src.live_face_rec import LiveFaceRec
 
 
 def get_window_size(monitorIndex):
-    
     monitors = screeninfo.get_monitors()
     monitor = monitors[monitorIndex]
 
@@ -33,4 +32,4 @@ if __name__ == '__main__':
     #width, height = get_window_size(args.monitor)
 
     fr = LiveFaceRec(args.record, args.directory, width, height, args.factor)
-    fr.run()
+    fr.rec_directory("images")

@@ -25,6 +25,9 @@ class LiveFaceRec:
         self.height = height
         self.learn_faces(directory)
 
+        self.unknown = "unknown"
+        self.noFace = "noFace"
+
 
    
 
@@ -38,7 +41,7 @@ class LiveFaceRec:
 
 
     def process_frame(self, frame):
-
+        name = self.noFace
         if self.process:
 
             self.face_locations = face_recognition.face_locations(frame)
@@ -48,7 +51,7 @@ class LiveFaceRec:
             for face_encoding in self.face_encodings:
              
                 matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding)
-                name = "Unknown"
+                name = self.unknown
 
              
                 face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
@@ -59,7 +62,7 @@ class LiveFaceRec:
                 self.face_names.append(name)
 
         self.process = not self.process
-
+        return name
 
     def rec_frame(self, frame):
         
@@ -108,16 +111,29 @@ class LiveFaceRec:
 
             cv2.destroyAllWindows()
 
+    def scan_image_directory(self, directory):
+        for filename in os.listdir(directory):
+            if filename.endswith(".jpg"):
+                img = cv2.imread(directory + os.path.sep + filename) 
+                result =self.process_frame(img)
+                print(result + "," + filename)
+                continue
+            else:
+                continue
+
+
+
     def run(self):
         
         if self.record == 'camera':
             self.rec_camera()
         elif self.record == 'screen':
-            self.rec_screen()
+            self.rec_screen() 
+        elif self.record == 'directory':
+            self.scan_image_directory("images")
         else:
             print('Choose a correct mode!')
 
-           
 
 
 
