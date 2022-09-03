@@ -22,20 +22,19 @@ class LiveFaceRec:
 
         self.width = width
         self.height = height
-        self.learnFaces(directory)
+        self.LearnFaces(directory)
 
         self.unknown = "unknown"
         self.no_face = "no face"
 
-    def learnFaces(self, directory):
+    def LearnFaces(self, directory):
 
         print('Learning faces from ' + directory)
-
         for item in os.listdir(directory):
             self.known_face_encodings.append(face_recognition.face_encodings(face_recognition.load_image_file(directory + os.path.sep + item))[0])
             self.known_face_names.append(item.split(".")[0])
 
-    def processFrame(self, frame):
+    def ProcessFrame(self, frame):
         name = self.no_face
         if self.process:
 
@@ -59,12 +58,12 @@ class LiveFaceRec:
         self.process = not self.process
         return name
 
-    def recordFrame(self, frame):
+    def RecordFrame(self, frame):
         
         small_frame = cv2.resize(frame, (0, 0), fx=1/self.downscaleFactor, fy=1/self.downscaleFactor)
         small_frame = small_frame[:, :, ::-1]
         
-        self.processFrame(small_frame)
+        self.ProcessFrame(small_frame)
 
 
         for (top, right, bottom, left), name in zip(self.face_locations, self.face_names):
@@ -80,49 +79,48 @@ class LiveFaceRec:
         
         return frame     
 
-    def recordCamera(self):
+    def RecordCamera(self):
         video_capture = cv2.VideoCapture(0)
 
         while True:
             ret, frame = video_capture.read()
-            cv2.imshow('Screen', self.recordFrame(frame))
+            cv2.imshow('Screen', self.RecordFrame(frame))
             if cv2.waitKey(1) == ord("q"):
                 break
 
         video_capture.release()
         cv2.destroyAllWindows()
             
-    def recordScreen(self):
+    def RecordScreen(self):
         mon = {'top': 0, 'left': 0, 'width': self.width, 'height': self.height}
    
         with mss() as sct:
             while True:
 
                 frame = cv2.cvtColor(np.array(sct.grab(mon)), cv2.COLOR_BGRA2BGR)
-                cv2.imshow('Screen', self.recordFrame(frame))
+                cv2.imshow('Screen', self.RecordFrame(frame))
 
                 if cv2.waitKey(1) == ord("q"):
                     break
 
             cv2.destroyAllWindows()
 
-    def searchFaceInImageDirectory(self, directory):
+    def SearchFaceInImageDirectory(self, directory: str):
         for filename in os.listdir(directory):
             if filename.endswith(".jpg"):
                 img = cv2.imread(directory + os.path.sep + filename)
-                result = self.processFrame(img)
+                result = self.ProcessFrame(img)
                 if result != self.no_face:
-                    shutil.copy2(directory + os.path.sep + filename, directory + os.path.sep + "out" + os.path.sep  + filename) # complete target filename given
-                    print(result + "," + filename)
+                    print(result)
                 continue
             else:
                 continue
 
-    def scanImagesForFaces(self, directory):
+    def ScanImagesForFaces(self, directory):
         for filename in os.listdir(directory):
             if filename.endswith(".jpg"):
                 img = cv2.imread(directory + os.path.sep + filename)
-                result = self.processFrame(img)
+                result = self.ProcessFrame(img)
                 if result != self.no_face:
                     shutil.copy2('/src/dir/file.ext', '/dst/dir/newname.ext') # complete target filename given
                     print(result + "," + filename)
@@ -132,14 +130,14 @@ class LiveFaceRec:
 
     
 
-    def run(self):
+    def Run(self):
         
         if self.record == 'camera':
-            self.recordCamera()
+            self.RecordCamera()
         elif self.record == 'screen':
-            self.recordScreen() 
+            self.RecordScreen() 
         elif self.record == 'directory':
-            self.searchFaceInImageDirectory("images")
+            self.SearchFaceInImageDirectory("images")
         else:
             print('Choose a correct mode!')
 

@@ -1,6 +1,6 @@
 import screeninfo
 import argparse
-from src.live_face_rec import LiveFaceRec
+from src import LiveFaceRec
 
 
 def get_window_size(monitorIndex):
@@ -21,7 +21,7 @@ if __name__ == '__main__':
 
     parser = argparse.ArgumentParser(formatter_class=argparse.ArgumentDefaultsHelpFormatter)
     parser.add_argument("-r", "--record", help="record screen or camera", default='camera', type=str)
-    parser.add_argument("-d", "--directory", help="directory for known face images", default='../learn', type=str)
+    parser.add_argument("-d", "--directory", help="directory for known face images", default='./learn', type=str)
     parser.add_argument("-s", "--size", help="window size width,height", default='800,800', type=str)
     parser.add_argument("-f", "--factor", help="down scale factor for image processing", default=1, type=int)
     parser.add_argument("-m", "--monitor", help="monitor index", default=0, type=int)
@@ -33,4 +33,4 @@ if __name__ == '__main__':
 
     fr = LiveFaceRec(args.record, args.directory, width, height, args.factor)
     #fr.recordScreen()
-    fr.searchFaceInImageDirectory("../images")
+    fr.SearchFaceInImageDirectory("./images")
