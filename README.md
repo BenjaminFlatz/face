@@ -19,4 +19,3 @@ Project to recognize known faces on camera or screen.
   -s     --size      window size width,height (default: 800,800)
   -f     --factor    down scale factor for image processing (default: 4)
   -m     --monitor   monitor index (default: 0)
-```

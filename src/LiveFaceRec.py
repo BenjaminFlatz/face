@@ -4,8 +4,7 @@ import numpy as np
 import os
 import numpy as np
 from mss import mss
-
-
+import shutil
 
 class LiveFaceRec:
     def __init__(self, record, directory, width, height, downscaleFactor):
@@ -23,22 +22,20 @@ class LiveFaceRec:
 
         self.width = width
         self.height = height
-        self.learn_faces(directory)
+        self.LearnFaces(directory)
 
+        self.unknown = "unknown"
+        self.no_face = "no face"
 
-   
-
-    def learn_faces(self, directory):
+    def LearnFaces(self, directory):
 
         print('Learning faces from ' + directory)
-
         for item in os.listdir(directory):
             self.known_face_encodings.append(face_recognition.face_encodings(face_recognition.load_image_file(directory + os.path.sep + item))[0])
             self.known_face_names.append(item.split(".")[0])
 
-
-    def process_frame(self, frame):
-
+    def ProcessFrame(self, frame):
+        name = self.no_face
         if self.process:
 
             self.face_locations = face_recognition.face_locations(frame)
@@ -48,7 +45,7 @@ class LiveFaceRec:
             for face_encoding in self.face_encodings:
              
                 matches = face_recognition.compare_faces(self.known_face_encodings, face_encoding)
-                name = "Unknown"
+                name = self.unknown
 
              
                 face_distances = face_recognition.face_distance(self.known_face_encodings, face_encoding)
@@ -59,14 +56,14 @@ class LiveFaceRec:
                 self.face_names.append(name)
 
         self.process = not self.process
+        return name
 
-
-    def rec_frame(self, frame):
+    def RecordFrame(self, frame):
         
         small_frame = cv2.resize(frame, (0, 0), fx=1/self.downscaleFactor, fy=1/self.downscaleFactor)
         small_frame = small_frame[:, :, ::-1]
         
-        self.process_frame(small_frame)
+        self.ProcessFrame(small_frame)
 
 
         for (top, right, bottom, left), name in zip(self.face_locations, self.face_names):
@@ -82,42 +79,68 @@ class LiveFaceRec:
         
         return frame     
 
-    def rec_camera(self):
+    def RecordCamera(self):
         video_capture = cv2.VideoCapture(0)
 
         while True:
             ret, frame = video_capture.read()
-            cv2.imshow('Screen', self.rec_frame(frame))
+            cv2.imshow('Screen', self.RecordFrame(frame))
             if cv2.waitKey(1) == ord("q"):
                 break
 
         video_capture.release()
         cv2.destroyAllWindows()
             
-    def rec_screen(self):
+    def RecordScreen(self):
         mon = {'top': 0, 'left': 0, 'width': self.width, 'height': self.height}
    
         with mss() as sct:
             while True:
 
                 frame = cv2.cvtColor(np.array(sct.grab(mon)), cv2.COLOR_BGRA2BGR)
-                cv2.imshow('Screen', self.rec_frame(frame))
+                cv2.imshow('Screen', self.RecordFrame(frame))
 
                 if cv2.waitKey(1) == ord("q"):
                     break
 
             cv2.destroyAllWindows()
 
-    def run(self):
+    def SearchFaceInImageDirectory(self, directory: str):
+        for filename in os.listdir(directory):
+            if filename.endswith(".jpg"):
+                img = cv2.imread(directory + os.path.sep + filename)
+                result = self.ProcessFrame(img)
+                if result != self.no_face:
+                    print(result)
+                continue
+            else:
+                continue
+
+    def ScanImagesForFaces(self, directory):
+        for filename in os.listdir(directory):
+            if filename.endswith(".jpg"):
+                img = cv2.imread(directory + os.path.sep + filename)
+                result = self.ProcessFrame(img)
+                if result != self.no_face:
+                    shutil.copy2('/src/dir/file.ext', '/dst/dir/newname.ext') # complete target filename given
+                    print(result + "," + filename)
+                continue
+            else:
+                continue
+
+    
+
+    def Run(self):
         
         if self.record == 'camera':
-            self.rec_camera()
+            self.RecordCamera()
         elif self.record == 'screen':
-            self.rec_screen()
+            self.RecordScreen() 
+        elif self.record == 'directory':
+            self.SearchFaceInImageDirectory("images")
         else:
             print('Choose a correct mode!')
 
-           
 
 
 
