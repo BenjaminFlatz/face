@@ -1,5 +1,4 @@
 from logging import captureWarnings
-from cv2 import dnn_superres
 import cv2
 from mss import mss
 import os
@@ -13,11 +12,13 @@ class Upscale:
         self.imageFileExtensions = (".jpg", ".png", ".bmp")
         self.videoFileExtensions = (".mp4")
 
-        self.sr = dnn_superres.DnnSuperResImpl_create()
+        cv2.cuda.printCudaDeviceInfo(0)
+        self.sr = cv2.dnn_superres.DnnSuperResImpl_create()
+        
         self.sr.readModel(self.modelPath)
+        self.sr.setModel(self.modelName, self.scaleFactor)
         self.sr.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
         self.sr.setPreferableTarget(cv2.dnn.DNN_BACKEND_CUDA)
-        self.sr.setModel(self.modelName, self.scaleFactor)
 
 
     def UpscaleVideo(self, capture):
@@ -25,7 +26,7 @@ class Upscale:
             ret, frame = capture.read()
             if ret == True: 
                 upscaled = self.sr.upsample(frame)
-                bicubic = cv2.resize(frame,
+                bicubic = cv2.resize(frame, 
                     (upscaled.shape[1], upscaled.shape[0]),
                     interpolation=cv2.INTER_CUBIC)
 
@@ -68,11 +69,6 @@ class Upscale:
     
     
     def Video(self, videoPath: str, outputPath: str):
-        
         if videoPath.endswith(self.videoFileExtensions):
             capture = cv2.VideoCapture(videoPath)
-            self.sr.readModel(self.modelPath)
-            self.sr.setModel(self.modelName, self.scaleFactor)
             self.UpscaleVideo(capture)
-
-
