@@ -18,21 +18,26 @@ class Upscale:
         self.sr.readModel(self.modelPath)
         self.sr.setModel(self.modelName, self.scaleFactor)
         self.sr.setPreferableBackend(cv2.dnn.DNN_BACKEND_CUDA)
-        self.sr.setPreferableTarget(cv2.dnn.DNN_BACKEND_CUDA)
+        self.sr.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
 
 
-    def UpscaleVideo(self, capture):
+    def UpscaleVideo(self, capture, outputPath):
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')
+        out = cv2.VideoWriter(outputPath, fourcc, 20.0, (1920,1080))
+
         while capture.isOpened():
             ret, frame = capture.read()
             if ret == True: 
                 upscaled = self.sr.upsample(frame)
-                bicubic = cv2.resize(frame, 
-                    (upscaled.shape[1], upscaled.shape[0]),
-                    interpolation=cv2.INTER_CUBIC)
+                out.write(upscaled)
+                cv2.imshow('upscaled', upscaled)
+                #bicubic = cv2.resize(frame, 
+                #    (upscaled.shape[1], upscaled.shape[0]),
+                #    interpolation=cv2.INTER_CUBIC)
 
                 #cv2.imshow("Original", frame)
-                cv2.imshow("Bicubic", bicubic)
-                cv2.imshow("Super Resolution", upscaled)
+                #cv2.imshow("Bicubic", bicubic)
+                #cv2.imshow("Super Resolution", upscaled)
             else:
                 break
 
@@ -48,7 +53,7 @@ class Upscale:
                 image = cv2.imread(imagePath)
            
                 result = self.sr.upsample(image)
-                cv2.imwrite(outputPath + os.path.sep + "upscaled.png", result)
+                cv2.imwrite(outputPath, result)
         except Exception as e:
             print(e)
 
@@ -71,4 +76,4 @@ class Upscale:
     def Video(self, videoPath: str, outputPath: str):
         if videoPath.endswith(self.videoFileExtensions):
             capture = cv2.VideoCapture(videoPath)
-            self.UpscaleVideo(capture)
+            self.UpscaleVideo(capture, outputPath)
