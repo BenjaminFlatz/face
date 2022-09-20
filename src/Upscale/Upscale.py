@@ -1,8 +1,10 @@
 from logging import captureWarnings
+from multiprocessing.connection import wait
 import cv2
 from mss import mss
 import os
 import numpy as np
+import math
 class Upscale:
     def __init__(self, modelPath, modelName, scaleFactor):
         self.modelPath = modelPath
@@ -24,38 +26,40 @@ class Upscale:
 
     def UpscaleOversizedImage(self, image):
         
-        parts = self.SplitImage(image)
-        if image.shape[1] < self.maxWidth:
-
-            return self.AddImages(parts[0], parts[1])
-        else:
-            leftPart = self.UpscaleOversizedImage(parts[0])
-            rightPart = self.UpscaleOversizedImage(parts[1])
-            return self.AddImages(parts[0], parts[1])
-
-        
-    def MagicMirror(self, image):
-        
-        parts = self.SplitImage(image)
-        if image.shape[1] < self.maxWidth:
-            upscaledLeft = self.sr.upsample(parts[0])
-            upscaledRight = self.sr.upsample(parts[1])
-            return self.AddImages(upscaledLeft, upscaledRight)
-        else:
-            leftPart = self.UpscaleOversizedImage(parts[0])
-            rightPart = self.UpscaleOversizedImage(parts[1])
-            return self.AddImages(leftPart, rightPart)
-
-        
-    def SplitImage(self, image):
         height, width, channels = image.shape
-        half = width//2
-        leftPart = image[:, :half] 
-        rightPart = image[:, half:]
-        cv2.imshow('upscaled', leftPart)
-        cv2.imshow('upscaled', rightPart)
+        numberOfParts = math.ceil(width/self.maxWidth)
+        newImage = (0,0,0)
+        i = 0
+        height, width, channels = image.shape  
+        partWidth = width//numberOfParts
+        cut = width-partWidth
+        while i < numberOfParts:
+            part = image[:, cut:]
+            image = image[:, :cut]
+            cut -= partWidth
+            newImage += self.sr.upsample(part)
+            cv2.imshow('part', part)
+            cv2.waitKey(0)
 
-        return leftPart, rightPart
+            i += 1
+        
+        return newImage
+      
+
+        
+    def SplitImage(self, image, numberOfParts):
+        i = 0
+        parts = []
+        height, width, channels = image.shape  
+        partWidth = width//numberOfParts
+        rightPartWidth = partWidth
+        while i < numberOfParts:
+            leftPartWidth = width-rightPartWidth
+            rightPartWidth += partWidth
+            part = image[:, leftPartWidth:rightPartWidth]
+            self.sr.upsample(part)
+            parts.append(part)
+        return parts
 
         
     def AddImages(self, leftPart, rightPart):
@@ -90,13 +94,12 @@ class Upscale:
 
     def Image(self, imagePath: str, outputPath: str):
 
-        try:
-            if imagePath.endswith(self.imageFileExtensions):
-                image = cv2.imread(imagePath)
-                result = self.UpscaleOversizedImage(image)
-                cv2.imwrite(outputPath, result)
-        except Exception as e:
-            print(e)
+
+        if imagePath.endswith(self.imageFileExtensions):
+            image = cv2.imread(imagePath)
+            result = self.UpscaleOversizedImage(image)
+            cv2.imwrite(outputPath, result)
+
 
     def Screen(self, x, y, width, height):
         mon = {'top': x, 'left': y, 'width': width, 'height': height}
