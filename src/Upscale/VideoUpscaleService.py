@@ -2,7 +2,9 @@
 from .Upscale import Upscale
 
 class VideoUpscaleService:
-    def __init__(self, videoPath, outputPath, modelPath, modelName, scaleFactor):
+    def __init__(self, modelPath, modelName, scaleFactor):
         self.upscale = Upscale(modelPath, modelName, scaleFactor)
-        self.upscale.Video(videoPath, outputPath)
+        
+    def UpscaleVideo(self, videoPath, outputPath, videoFormat):
+        self.upscale.Video(videoPath, outputPath, videoFormat)
 

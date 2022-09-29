@@ -14,8 +14,11 @@ if __name__ == '__main__':
 
     #screen = ScreenUpscaleService("models/ESPCN_x4.pb", "espcn", 4)
     
-    video = VideoUpscaleService("videos/test_hd.mkv", "videos/upscaled_espcn_x2.mkv", "models/ESPCN_x2.pb", "espcn", 2)
-    #video = VideoUpscaleService("videos/test.mp4", "videos/upscaled_espcn_x2.mp4", "models/ESPCN_x2.pb", "espcn", 2)    
-    
+    #video = VideoUpscaleService("videos/test_hd.mkv", "videos/upscaled_espcn_x2.mkv", "models/ESPCN_x2.pb", "espcn", 2)
+    upscaleService = VideoUpscaleService("models/EDSR_x2.pb", "edsr", 2)    
+    #upscaleService.upscale.Video("videos/test.mp4", "videos/out/", ".mp4")
+    #upscaleService.upscale.Video("videos/test_hd.mp4", "videos/out/", ".mp4")
+    upscaleService.upscale.Video("videos/test_hd.mp4", "videos/out/", ".mp4")
+
     #video = VideoUpscaleService("videos/test.mp4", "videos/upscaled_edsr_x4.mp4","models/EDSR_x4.pb", "edsr", 4)
     #video = VideoUpscaleService("videos/test.mp4", "videos/upscaled_lapsrn_x4.mp4", "models/LapSRN_x4.pb", "lapsrn", 4)
