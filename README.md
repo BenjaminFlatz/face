@@ -1,9 +1,10 @@
 # Face
 
-This project is split up in several parts. All of them are an implementation of some machine learning program.
+This project is split up into several parts.
+All of them are implementations of some machine learning program.
 
 
-## Face recognition
+## 1. Face recognition
 Project to recognize known faces on camera, sceen or images. It uses the face_recognition package and only runs on the CPU.
 
 ### optional arguments
@@ -16,7 +17,7 @@ Project to recognize known faces on camera, sceen or images. It uses the face_re
   -m     --monitor   monitor index (default: 0)
 ```
 
-## Upscale
+## 2. Upscale
 The focus of this project is to upsample images and videos. It uses the cv2 package and can use the GPU.
 
 
