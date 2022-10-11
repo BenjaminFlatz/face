@@ -1,15 +1,10 @@
 # Face
 
-### description
+This project is split up in several parts. All of them are an implementation of some machine learning program.
 
-Project to recognize known faces on camera or screen.
 
-### goals
-
-- [x] use/learn face_recognition
-- [x] name known faces to image filenames
-- [x] let user choose between screen or camera
-
+## Face recognition
+Project to recognize known faces on camera, sceen or images. It uses the face_recognition package and only runs on the CPU.
 
 ### optional arguments
 ```
@@ -19,3 +14,9 @@ Project to recognize known faces on camera or screen.
   -s     --size      window size width,height (default: 800,800)
   -f     --factor    down scale factor for image processing (default: 4)
   -m     --monitor   monitor index (default: 0)
+```
+
+## Upscale
+The focus of this project is to upsample images and videos. It uses the cv2 package and can use the GPU.
+
+
