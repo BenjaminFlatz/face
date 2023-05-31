@@ -27,6 +27,7 @@ class Upscale:
         self.sr.setPreferableTarget(cv2.dnn.DNN_TARGET_CUDA_FP16)
 
     def AddImages(self, leftImage, rightImage):
+        #row1 = cv2.hconcat([x, y])
         ha, wa = leftImage.shape[:2]
         hb, wb = rightImage.shape[:2]
         max_height = np.max([ha, hb])
